@@ -24,4 +24,17 @@
  
    二、TF-IDF算法还有一个缺点就是不能反应词的位置信息，在对关键词进行提取的时候，词的位置信息，例如文本的标题、文本的首句和尾句等含有较重要的信息，应该赋予较高的权重。
 
+6 bert模型可以做相似度任务吗？
+
+  一.首先一点是在不finetune的情况下，cosine similairty绝对值没有实际意义，bert pretrain计算的cosine similairty都是很大的，如果你直接以cosine similariy>0.5之类的阈值来判断相似不相似那肯定效果很差。如果用做排序，也就是cosine(a,b)>cosine(a,c)->b相较于c和a更相似，是可以用的。总而言之就是你模型评价的标准应该使用auc，而不是accuracy
+
+  二.短文本（新闻标题）语义相似度任务用先进的word embedding（英文fasttext/glove，中文tencent embedding）mean pooling后的效果就已经不错；而对于长文本（文章）用simhash这种纯词频统计的完全没语言模型的简单方法也ok
+
+  三.bert pretrain模型直接拿来用作 sentence embedding效果甚至不如word embedding，cls的emebdding效果最差（也就是你说的pooled output）。把所有普通token embedding做pooling勉强能用（这个也是开源项目bert-as-service的默认做法），但也不会比word embedding更好。
+
+  四.用siamese的方式训练bert，上层通过cosine做判别，能够让bert学习到一种适用于cosine作为最终相似度判别的sentence embedding，效果优于word embedding，但因为缺少sentence pair之间的特征交互，比原始bert sentence pair fine tune还是要差些。
+
+
+7 bert pretrain 计算的cosine similarity 为什么都很大？冰箱和妈妈居然大于0.95
+
 
